@@ -5,31 +5,36 @@ def path(relative):
     base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base, relative)
 
-patchfiles = [x for x in os.listdir() if x.endswith('.patch')]
+patches = [x for x in os.listdir() if x.endswith('.patch')]
 
-if len(patchfiles) == 0:
+if len(patches) == 0:
     print('No patches found. Press any key to exit.')
     os.system('pause >NUL')
     sys.exit()
 
-for patchfile in patchfiles:
-    infile = patchfile.replace('.patch', '.mkv')
-    info = str(check_output(path(f'xdelta3 printhdr "{patchfile}"')))
+for patch in patches:
+    infile = patch.replace('.patch', '.mkv')
+    info = str(check_output(path(f'xdelta3 printhdr "{patch}"')))
     outfile = info.split('(output):')[1].split('.mkv')[0].strip().split('\\\\')[-1]+'.mkv'
-    print(f'\nPatching "{infile}" to "{outfile}"')
-    cmd = f'xdelta3.exe -d -s "{infile}" "{patchfile}" "{outfile}"'
+
+    print(f'Patching "{infile}" to "{outfile}"', end='')
+    if not os.path.exists('Patched'):
+        os.mkdir('Patched')
+
+    cmd = f'xdelta3.exe -d -s "{infile}" "{patch}" "Patched\\{outfile}"'
     p = Popen(path(cmd), stdin=PIPE, stdout=PIPE, stderr=STDOUT, shell=True)
     output = str(p.stdout.read())
+
     if 'overwrite output file' in output:
-        print('The output filename already exists. Delete it and try again.')
+        print('\nThe output filename already exists. Delete it and try again.')
     elif 'file open failed' in output:
-        print('Make sure the video and the patch file have the same name.')
+        print('\nMake sure the encode and the patch files have the same name.')
     elif 'target window checksum mismatch' in output:
-        print('This patch is not made for this file.')
+        print('\nThis patch is not made for this encode.')
     elif len(output) == 3:
-        print('Done!')
+        print(' - Done!')
     else:
         print((output))
 
-print('Visit AnimeKaizoku.com for more!\nPress any key to exit.')
+print('\nVisit AnimeKaizoku.com for more!\nPress any key to exit.')
 os.system('pause >NUL')
