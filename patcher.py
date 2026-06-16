@@ -36,5 +36,5 @@ for patch in patches:
     else:
         print((output))
 
-print('\nVisit AnimeKaizoku.com for more!\nPress any key to exit.')
+print('\nVisit Kaizoku.cyou for more!\nPress any key to exit.')
 os.system('pause >NUL')
